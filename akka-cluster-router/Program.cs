@@ -20,9 +20,10 @@ akka {
         provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
         deployment {
             /talker {
-                router = broadcast-group
+                router = broadcast-pool
                 routees.paths = [""/user/someActor""]
-                nr-of-instances = 3
+                nr-of-instances = 5
+                virtual-nodes-factor = 10
                 cluster {
 			        enabled = on
 					allow-local-routees = off
@@ -73,25 +74,20 @@ akka {
                 Console.WriteLine("Created System.");
 
                 var someActor = system.ActorOf(Props.Create(() => new SomeActor(12345)), "someActor");
-                var someActorThatDoesNotGetCreated = system.ActorOf(Props.Create(() => new SomeActor(someActor)), "someActorThatDoesNotGetCreated");
-                var router = system.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), "talker");
-
-                system
-                   .Scheduler
-                   .ScheduleTellRepeatedly(TimeSpan.FromSeconds(0),
-                            TimeSpan.FromSeconds(5),
-                            router, 654321, ActorRefs.NoSender);
-
-                system
-                   .Scheduler
-                   .ScheduleTellRepeatedly(TimeSpan.FromSeconds(0),
-                            TimeSpan.FromSeconds(5),
-                            someActorThatDoesNotGetCreated, 654321, ActorRefs.NoSender);
-
+                var props = Props.Create(() => new SomeActor(someActor)).WithRouter(FromConfig.Instance);
                 var configNode = ConfigurationFactory.ParseString(nonSeedConfig);
 
                 using (var systemNode = ActorSystem.Create("clusterSystem", configNode))
                 {
+
+                    var router = system.ActorOf(props, "talker");
+
+                    system
+                       .Scheduler
+                       .ScheduleTellRepeatedly(TimeSpan.FromSeconds(0),
+                                TimeSpan.FromSeconds(5),
+                                router, 654321, ActorRefs.NoSender);
+
                     Console.ReadLine();
                 }
             }
