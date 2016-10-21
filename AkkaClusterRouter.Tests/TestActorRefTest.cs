@@ -8,10 +8,10 @@ using Xunit;
 
 namespace AkkaClusterRouter
 {
-    public class RefTest: TestKit
+    public class TestActorRefTest: TestKit
     {
         [Fact]
-        public void Test()
+        public void TestActorPassedInConstructor_ProxiesMessageToTestActor()
         {
              var seedConfig = @"
 akka {
