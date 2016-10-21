@@ -106,7 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\SomeActor.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="TestActorRefTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
